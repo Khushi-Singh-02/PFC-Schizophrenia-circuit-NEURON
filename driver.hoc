@@ -1,0 +1,327 @@
+load_file("nrngui.hoc")
+load_file("cholinergic_neuron.hoc")
+load_file("GABAfsi.hoc")
+load_file("GABAnfsi.hoc")
+load_file("Pyramidal_cell.hoc")
+
+objref chol, gabafsi, gabanfsi, pyrcell, pcell
+chol = new cholinergic()
+gabafsi = new GABAfsi()
+gabanfsi = new GABAnfsi()
+pyrcell = new pyramidal()
+pcell = new pyramidal()
+
+
+//------------------------------Plotting the graphs---------------------------------
+
+objectvar g[20]		//array that can hold 20 objrefs
+ngraph = 0
+proc addgraph() { local ii	//why ii?
+  			//ii= ngraph; would this not work?
+  ngraph = ngraph + 1
+  ii = ngraph -1
+  g[ii] = new Graph()		//array, w each element referencing a graph
+  g[ii].size (0, tstop, -90, 40)
+  g[ii].xaxis()
+  g[ii].yaxis()
+  g[ii].addvar($s1,$2,$3)
+  
+  g[ii].save_name("graphList[0].")	//graph name saved in new array
+  graphList[0].append(g[ii])
+  
+    
+}
+
+if(ismenu==0) {
+  nrnmainmenu()         // create main menu
+  nrncontrolmenu()      // create control menu
+  ismenu=1
+}
+
+
+//------------------------------RECEPTORS-----------------------------------------------
+/*
+// RECEPTORS ON GABA fsi
+
+access gabafsi.soma
+access gabanfsi.soma
+access chol.soma
+access pyrcell.soma
+*/
+objref stim
+chol.soma stim = new IClamp(0.5)
+stim.amp = 10
+stim.del = 1
+stim.dur = 5
+/*
+objectvar grec1[1000]
+for r = 0,999{
+  grec1[r] = new GABAA()
+  gabafsi.soma grec1[r].loc(0.5)		
+  setpointer grec1[r].C, gabanfsi.soma.T_gabanrelease
+}
+
+objectvar grec2[1000]
+for r = 0,999{
+  grec2[r] = new GABAB()
+  gabafsi.axon[456] grec2[r].loc(0.9)		
+  setpointer grec2[r].C, gabafsi.soma.T_gabafrelease		
+}
+
+objectvar grec3[100]				
+for r = 0,99{
+  grec3[r] = new AMPA()
+  gabafsi.dend[83] grec3[r].loc(0.5)
+  setpointer grec3[r].C, pyrcell.soma.T_glurelease
+}
+
+objectvar grec4[100]		
+for r = 0,99{
+  grec4[r] = new NMDA()
+  gabafsi.dend[83] grec4[r].loc(0.5)			
+  setpointer grec4[r].C, pyrcell.soma.T_glurelease
+}
+
+objectvar grec5[1000]
+for i= 1, 83{
+    for r = 0,999{
+        grec5[r] = new a7()
+        gabafsi.dend[i] grec5[r].loc(0.5)		//will vary for every dend, soma, axon to check effects
+        setpointer grec5[r].C, chol.soma.T_achrelease
+    }
+}
+
+objectvar grec6[100]
+for r = 0,99{
+  grec6[r] = new a3b4()
+  gabafsi.soma grec6[r].loc(0.5)			//not studied, majorly presyn?
+  setpointer grec6[r].C, chol.soma.T_achrelease
+}
+
+objectvar grec7[100]
+for r = 0,99{
+  grec6[r] = new a4b2()
+  gabafsi.soma grec6[r].loc(0.5)			//not studied, majorly presyn?
+  setpointer grec6[r].C, chol.soma.T_achrelease
+}
+
+// RECEPTORS ON GABA nfsi
+
+objectvar gnrec1[1000]
+for r = 0,999{
+  gnrec1[r] = new GABAA()
+  gabanfsi.soma gnrec1[r].loc(0.5)		
+  setpointer gnrec1[r].C, gabafsi.soma.T_gabafrelease		
+}
+
+objectvar gnrec2[1000]
+for r = 0,999{
+  gnrec2[r] = new GABAB()
+  gabanfsi.axon[98] gnrec2[r].loc(0.9)		
+  setpointer gnrec2[r].C, gabanfsi.soma.T_gabanrelease		
+}
+
+objectvar gnrec3[100]				
+for r = 0,99{
+  gnrec3[r] = new AMPA()
+  gabanfsi.dend[68] gnrec3[r].loc(0.5)		
+  setpointer gnrec3[r].C, pyrcell.soma.T_glurelease
+}
+
+objectvar gnrec4[100]				
+for r = 0,99{
+  gnrec4[r] = new NMDA()
+  gabanfsi.dend[68] gnrec4[r].loc(0.5)		
+  setpointer gnrec4[r].C, pyrcell.soma.T_glurelease
+}
+
+objectvar gnrec5[1000]
+for i=1, 68{
+    for r = 0,999{
+        gnrec5[r] = new a7()			//will vary for every dend, soma, axon to check effects
+        gabanfsi.soma gnrec5[r].loc(0.5)		
+        setpointer gnrec5[r].C, chol.soma.T_achrelease
+    }
+}
+
+objectvar gnrec6[100]
+for r = 0,99{
+  gnrec6[r] = new a3b4()
+  gabanfsi.soma gnrec6[r].loc(0.5)		//not studied, majorly presyn?
+  setpointer gnrec6[r].C, chol.soma.T_achrelease
+}
+
+objectvar gnrec7[100]
+for r = 0,99{
+  gnrec6[r] = new a4b2()
+  gabanfsi.soma gnrec6[r].loc(0.5)		//not studied, majorly presyn?
+  setpointer gnrec6[r].C, chol.soma.T_achrelease
+}
+
+// RECEPTORS ON PyrCell
+
+objectvar prec1[100]
+for r = 0,99{
+  prec1[r] = new GABAA()
+  pyrcell.soma prec1[r].loc(0.5)			
+  setpointer prec1[r].C, gabafsi.soma.T_gabafrelease
+}
+
+objectvar prec2[100]
+for r = 0,99{
+  prec2[r] = new GABAA()
+  pyrcell.soma prec2[r].loc(0.5)			
+  setpointer prec2[r].C, gabanfsi.soma.T_gabanrelease
+}
+
+objectvar prec3[20]				//low density because mostly presyn expression
+for r = 0,19{
+  prec3[r] = new GABAB()
+  pyrcell.dend[85] prec3[r].loc(0.5)		
+  setpointer prec3[r].C, gabafsi.soma.T_gabafrelease
+}
+
+objectvar prec4[20]				//low density because mostly presyn expression
+for r = 0,19{
+  prec4[r] = new GABAB()
+  pyrcell.dend[84] prec4[r].loc(0.5)		
+  setpointer prec4[r].C, gabanfsi.soma.T_gabanrelease
+}
+
+objectvar prec5[1000]
+for r = 0,999{
+  prec5[r] = new AMPA()
+  pyrcell.dend[83] prec5[r].loc(0.5)		
+  setpointer prec5[r].C, pcell.soma.T_glurelease		//input?
+}
+
+objectvar prec6[1000]
+for r = 0,999{
+  prec6[r] = new NMDA()
+  pyrcell.dend[83] prec6[r].loc(0.5)		
+  setpointer prec6[r].C, pcell.soma.T_glurelease		//input?
+}
+
+objectvar prec7[1000]
+for i= 1, 83{
+    for r = 0,999{
+      prec7[r] = new a7()			//will vary for every dend, soma, axon to check effects
+      pyrcell.dend[i] prec7[r].loc(0.5)			
+      setpointer prec7[r].C, chol.soma.T_achrelease
+    }
+}
+
+// RECEPTORS ON PCell
+
+objectvar pcrec1[100]
+for r = 0,99{
+  pcrec1[r] = new GABAA()
+  pcell.soma pcrec1[r].loc(0.5)			
+  setpointer pcrec1[r].C, gabafsi.soma.T_gabafrelease
+}
+
+objectvar pcrec2[100]
+for r = 0,99{
+  pcrec2[r] = new GABAA()
+  pcell.soma pcrec2[r].loc(0.5)			
+  setpointer pcrec2[r].C, gabanfsi.soma.T_gabanrelease
+}
+
+objectvar pcrec3[20]				//low density because mostly presyn expression
+for r = 0,19{
+  pcrec3[r] = new GABAB()
+  pcell.dend[85] pcrec3[r].loc(0.5)		
+  setpointer pcrec3[r].C, gabafsi.soma.T_gabafrelease
+}
+
+objectvar pcrec4[20]				//low density because mostly presyn expression
+for r = 0,19{
+  pcrec4[r] = new GABAB()
+  pcell.dend[84] pcrec4[r].loc(0.5)		
+  setpointer pcrec4[r].C, gabanfsi.soma.T_gabanrelease
+}
+
+objectvar pcrec5[1000]
+for r = 0,999{
+  pcrec5[r] = new AMPA()
+  pcell.dend[83] pcrec5[r].loc(0.5)		
+  setpointer pcrec5[r].C, pyrcell.soma.T_glurelease		//input?
+}
+
+objectvar pcrec6[1000]
+for r = 0,999{
+  pcrec6[r] = new NMDA()
+  pcell.soma pcrec6[r].loc(0.5)		
+  setpointer pcrec6[r].C, pyrcell.soma.T_rel		//input?
+}
+
+objectvar pcrec7[1000]
+for i= 1, 83{
+    for r = 0,999{
+      pcrec7[r] = new a7()			//will vary for every dend, soma, axon to check effects
+      pcell.dend[i] pcrec7[r].loc(0.5)			
+      setpointer pcrec7[r].C, chol.soma.T_achrelease
+    }
+}
+*/
+
+//-----------------------------GENERAL PARAMETERS--------------------------------------------
+
+dt=0.025
+tstop = 200
+v_init = -65
+celsius = 37
+
+//-----------------------------ADD GRAPHS--------------------------------------------------
+
+//GABA fsi
+
+//Ca check- soma bc rel, nachrs
+
+addgraph("gabafsi.soma.ica", 2, 1)		//rel
+g[0].addvar("gabafsi.dend[83].ica", 3, 1)		//last, nmda, a7
+g[0].addvar("gabafsi.dend[30].ica", 4, 1)		//random, a7
+g[0].addvar("gabafsi.axon[456].ica", 5, 1)		//last
+g[0].addvar("gabafsi.axon[5].ica", 6, 1)		//random
+
+//Na- near all rs
+
+addgraph("gabafsi.soma.ina", 2, 1)		//rel, gabaa
+//g[1].addvar("gabafsi.dend[456].ina", 3, 1)		//ampa, nmda, a7	
+g[1].addvar("gabafsi.dend[30].ina", 4, 1)		//random
+g[1].addvar("gabafsi.axon[83].ina", 5, 1)		//gabab
+g[1].addvar("gabafsi.axon[5].ina", 6, 1)		//random
+
+addgraph("gabafsi.soma.cai", 2, 1)
+g[0].addvar("gabanfsi.soma.cai", 3, 1)
+g[0].addvar("pyrcell.soma.cai", 4, 1)
+
+addgraph("gabafsi.soma.ica", 2, 1)
+g[0].addvar("gabanfsi.soma.ica", 3, 1)
+g[0].addvar("pyrcell.soma.ica", 4, 1)
+
+//Transmitter released
+addgraph("chol.soma.T_rel", 2, 1)
+//g[0].addvar("chol.soma.cai", 3, 1)
+addgraph("gabafsi.soma.T_rel", 3, 1)
+//g[0].addvar("gabafsi.soma.cai", 4, 1)
+addgraph("gabanfsi.soma.T_rel", 4, 1)
+//g[2].addvar("gabafsi.soma.cai", 5, 1)
+addgraph("pyrcell.soma.T_rel", 5, 1)
+//g[3].addvar("pyrcell.soma.cai", 6, 1)
+
+// Membrane potential 
+addgraph("gabafsi.soma.v(0.5)", 2, 1)
+g[0].addvar("gabafsi.dend.v(0.5)", 3, 1)
+g[0].addvar("gabafsi.axon.v(0.5)", 4, 1)
+
+addgraph("gabanfsi.soma.v(0.5)", 2, 1)
+g[1].addvar("gabanfsi.dend.v(0.5)", 3, 1)
+g[1].addvar("gabanfsi.axon.v(0.5)", 4, 1)
+
+addgraph("chol.soma.v(0.5)", 2, 1)
+
+addgraph("pyrcell.soma.v(0.5)", 2, 1)
+//g[3].addvar("pyrcell.dend.v(0.5)", 3, 1)
+//g[3].addvar("pyrcell.axon.v(0.5)", 4, 1)
+

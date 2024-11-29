@@ -1,0 +1,71 @@
+begintemplate cholinergic
+public init, biophys, geom
+public synlist, x, y, z, position, connect2target
+
+public soma
+public all, somatic
+
+objref synlist
+
+proc init() {
+  position(0,0,0)
+  synlist= new List()
+  subsets()
+  geom()
+  biophys()
+}
+
+create soma
+
+soma {
+    L = 30
+    diam = 30
+    nseg = 1
+    Ra=100
+    cm=1
+}
+
+objref all, somatic
+proc subsets() { 
+  objref all, somatic
+  all = new SectionList()
+  soma all.append()
+}
+
+proc geom() {
+    forsec all { }
+}
+
+proc biophys() {
+    forsec all {
+	    Ra=100
+     	    cm=1}
+
+    soma{
+        insert NaV11
+        insert NaV12
+        insert NaV16
+        insert KV13
+        insert KV72
+
+        insert Ca12L
+        insert Ca13L
+        insert Ca22N
+        insert HCN1
+        insert HCN2
+        insert NaKpump
+        //insert capump
+        insert leak
+        //insert achrelease
+        insert rel
+    }
+}
+
+proc position() { local i
+  soma for i = 0, n3d()-1 {
+    pt3dchange(i, $1-x+x3d(i), $2-y+y3d(i), $3-z+z3d(i), diam3d(i))
+  }
+  x = $1  y = $2  z = $3
+}
+
+endtemplate cholinergic
