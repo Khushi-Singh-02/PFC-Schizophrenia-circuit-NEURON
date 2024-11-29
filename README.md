@@ -2,4 +2,6 @@ To investigate the theory of hypofunction of α7 Nicotinic Acetylcholine Recepto
 aberrant neuronal circuitry implicated in neuroimaging studies in the NEURON Simulation Environment using the hoc and Python programming languages. The model comprises 
 Pyramidal cells and GABA interneurons in the PFC, expressing 19 ion channels, 5 receptors, buffering mechanism, leak currents, and Sodium, Potassium and Calcium pumps. 
 
+Running this code requires installation of the NEURON Simulation Environment: https://www.neuron.yale.edu/neuron/
+
 
